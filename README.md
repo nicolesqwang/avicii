@@ -1,6 +1,19 @@
 ## CalHacks 2025  
 By Emma, Sidh, Aatreyo, and Nicole  
 
+# To run the demo: 
+
+run in terminal:
+
+    cd ai-dj-gui
+
+    # (Optional) Install Flask if you don't have it already
+    pip install flask
+    
+    python app.py
+
+demo video also accessible here: https://youtu.be/up-Bnev-TF4
+
 # AUDIO PROCESSING  
 ## To set up (for audio processing):  
         python -m venv venv39  
@@ -21,16 +34,3 @@ Barmap: creates JSON with beginning times of each bar
     Uses beatmap  
     
 Crossfade
-
-# To run the demo: 
-
-run in terminal:
-
-    cd ai-dj-gui
-
-    # (Optional) Install Flask if you don't have it already
-    pip install flask
-    
-    python app.py
-
-demo video also accessible here: https://youtu.be/up-Bnev-TF4
