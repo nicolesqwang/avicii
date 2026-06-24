@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AI DJ{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <!-- Ambient holographic aura field (drifting colored glow blobs) -->
+    <div class="aura-field" aria-hidden="true">
+        <span class="aura-blob aura-blob--pink"></span>
+        <span class="aura-blob aura-blob--cyan"></span>
+        <span class="aura-blob aura-blob--yellow"></span>
+        <span class="aura-blob aura-blob--purple"></span>
+    </div>
+
+    <!-- Twinkling sparkle layer -->
+    <div class="sparkle-field" aria-hidden="true"></div>
+
+    <!-- Spinning disco ball decoration -->
+    <div class="disco-ball" aria-hidden="true">
+        <div class="disco-ball__glow"></div>
+        <div class="disco-ball__sphere"></div>
+        <div class="disco-ball__shine"></div>
+    </div>
+
+    <!-- Home button -->
+    <div class="header">
+        <div class="home-btn" onclick="window.location.href='/'">
+            <img src="{{ url_for('static', filename='images/Headphone_Home.png') }}" alt="Home">
+        </div>
+    </div>
+
+    {% block content %}{% endblock %}
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>
