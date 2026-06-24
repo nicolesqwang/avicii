@@ -7,6 +7,9 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__, static_folder='frontend')
 CORS(app)
 
+
+
+
 # Configuration
 UPLOAD_FOLDER = 'data/mp3s'
 METADATA_FOLDER = 'data/metadata'
@@ -18,9 +21,10 @@ os.makedirs(METADATA_FOLDER, exist_ok=True)
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@app.route('/')
-def index():
-    return send_from_directory('frontend', 'index.html')
+@app.route("/")
+def home():
+    return "🎧 AI DJ Backend is running"
+
 
 @app.route('/<path:path>')
 def serve_static(path):
@@ -194,3 +198,4 @@ if __name__ == '__main__':
     print("🌐 Frontend folder:", 'frontend')
     print("\n✨ Navigate to http://localhost:5000")
     app.run(debug=True, host='0.0.0.0', port=5000)
+
