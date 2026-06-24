@@ -6,3 +6,4 @@ scipy
 librosa
 soundfile
 flask-cors
+gunicorn

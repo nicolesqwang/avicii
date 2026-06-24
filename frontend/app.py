@@ -11,21 +11,22 @@ import json
 import subprocess
 from pathlib import Path
 
-# Add calhacks directory to Python path so we can import modules
-calhacks_path = os.path.abspath('..')  # Parent directory (calhacks2025)
-if os.path.exists(calhacks_path):
-    sys.path.insert(0, calhacks_path)
-    print(f"✅ Added to Python path: {calhacks_path}")
-else:
-    print(f"⚠️  Warning: calhacks2025 directory not found at {calhacks_path}")
+# Resolve paths relative to this file (not the process cwd) so the app
+# works the same whether it's run from frontend/, the repo root, or Render.
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))   # .../frontend
+REPO_ROOT = os.path.dirname(BASE_DIR)                    # repo root
+
+if REPO_ROOT not in sys.path:
+    sys.path.insert(0, REPO_ROOT)
+    print(f"✅ Added to Python path: {REPO_ROOT}")
 
 app = Flask(__name__)
-app.secret_key = 'your-secret-key-here'  # Change this in production!
+app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-here')  # Change this in production!
 
-# Configuration - Point to data directory (sibling to ai-dj-gui)
-MP3_DIR = "../data/mp3s"
-METADATA_DIR = "../data/metadata"
-OUTPUT_DIR = "../data/mixes"
+# Configuration - Point to data directory (sibling to frontend)
+MP3_DIR = os.path.join(REPO_ROOT, "data", "mp3s")
+METADATA_DIR = os.path.join(REPO_ROOT, "data", "metadata")
+OUTPUT_DIR = os.path.join(REPO_ROOT, "data", "mixes")
 UPLOAD_FOLDER = MP3_DIR
 ALLOWED_EXTENSIONS = {'mp3', 'wav'}
 
@@ -43,7 +44,7 @@ def allowed_file(filename):
 @app.route('/')
 def home():
     """Home page with two spinning vinyls"""
-    return render_template('home.html')
+    return render_template('index.html')
 
 
 @app.route('/new')
@@ -237,10 +238,10 @@ def upload_and_mix():
             # Run calibration
             try:
                 subprocess.run([
-                    'python', '-m', 'calibrate.calibrate_simple',
+                    sys.executable, '-m', 'calibrate.calibrate_simple',
                     track1_path,
                     '--no-stems'
-                ], capture_output=True, text=True, check=True, timeout=60)
+                ], capture_output=True, text=True, check=True, timeout=60, cwd=REPO_ROOT)
                 print(f"✅ Calibrated track 1")
             except Exception as e:
                 print(f"⚠️  Calibration warning for track 1: {e}")
@@ -280,10 +281,10 @@ def upload_and_mix():
             # Run calibration
             try:
                 subprocess.run([
-                    'python', '-m', 'calibrate.calibrate_simple',
+                    sys.executable, '-m', 'calibrate.calibrate_simple',
                     track2_path,
                     '--no-stems'
-                ], capture_output=True, text=True, check=True, timeout=60)
+                ], capture_output=True, text=True, check=True, timeout=60, cwd=REPO_ROOT)
                 print(f"✅ Calibrated track 2")
             except Exception as e:
                 print(f"⚠️  Calibration warning for track 2: {e}")
@@ -433,30 +434,16 @@ def process_mix():
         }), 500
 
 
-def run_crossfade(track1_path, track2_path, output_path, 
+def run_crossfade(track1_path, track2_path, output_path,
                   fade_beats=16, fade_curve='equal_power'):
     """Run the crossfade_stems.py script"""
-    
-    # Try multiple possible locations for crossfade script
-    possible_paths = [
-        '../dj_helpers/crossfade_stems.py',
-        'dj_helpers/crossfade_stems.py',
-        '../crossfade_stems.py',
-        'crossfade_stems.py'
-    ]
-    
-    crossfade_script = None
-    for path in possible_paths:
-        if os.path.exists(path):
-            crossfade_script = path
-            print(f"✅ Found crossfade script at: {path}")
-            break
-    
-    if not crossfade_script:
-        print("⚠️  Crossfade script not found in expected locations")
-        print("   Attempting to run as Python module...")
+
+    crossfade_script = os.path.join(REPO_ROOT, 'dj_helpers', 'crossfade_stems.py')
+
+    if os.path.exists(crossfade_script):
+        print(f"✅ Found crossfade script at: {crossfade_script}")
         cmd = [
-            'python', '-m', 'dj_helpers.crossfade_stems',
+            sys.executable, crossfade_script,
             track1_path,
             track2_path,
             '--fade-beats', str(fade_beats),
@@ -465,8 +452,10 @@ def run_crossfade(track1_path, track2_path, output_path,
             '--metadata-dir', METADATA_DIR
         ]
     else:
+        print("⚠️  Crossfade script not found in expected location")
+        print("   Attempting to run as Python module...")
         cmd = [
-            'python', crossfade_script,
+            sys.executable, '-m', 'dj_helpers.crossfade_stems',
             track1_path,
             track2_path,
             '--fade-beats', str(fade_beats),
@@ -474,11 +463,11 @@ def run_crossfade(track1_path, track2_path, output_path,
             '--out-path', output_path,
             '--metadata-dir', METADATA_DIR
         ]
-    
+
     print("=" * 60)
     print(f"🎚️  Running crossfade command:")
     print(f"   {' '.join(cmd)}")
-    print(f"   Working directory: {os.getcwd()}")
+    print(f"   Working directory: {REPO_ROOT}")
     print("=" * 60)
     
     try:
@@ -487,7 +476,8 @@ def run_crossfade(track1_path, track2_path, output_path,
             capture_output=True,
             text=True,
             check=True,
-            timeout=300
+            timeout=300,
+            cwd=REPO_ROOT
         )
         
         print(result.stdout)

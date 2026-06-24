@@ -1,10 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>AI DJ — Party Mix (Continuous)</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+{% extends "base.html" %}
+
+{% block title %}AI DJ — Party Mix (Continuous){% endblock %}
+
+{% block extra_head %}
   <style>
     :root{
       --ring-size: 340px;
@@ -14,13 +12,6 @@
       --pulse-glow: 0;           /* 0 .. 1 */
       --stereo-pan: 0px;         /* -8px .. +8px */
     }
-
-    .header .home-btn img{
-      width:60px;height:60px;cursor:pointer;
-      filter:drop-shadow(0 4px 8px rgba(0,0,0,.3));
-      transition:transform .3s ease;
-    }
-    .header .home-btn img:hover{ transform:scale(1.1) rotate(5deg); }
 
     .screen{
       max-width:1400px; margin:0 auto;
@@ -33,8 +24,14 @@
       font-size:2.4rem;
       font-weight: 700;
       font-family: var(--font-title);
-      letter-spacing:2px; color:aqua;
-      text-shadow:0 0 10px rgba(255,255,255,.15);
+      letter-spacing:2px;
+      background: var(--chrome-gradient);
+      background-size: 300% 300%;
+      animation: holoShift 5s linear infinite;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
     }
 
     .main-content {
@@ -71,7 +68,7 @@
       /* base shadow + reactive glow (second drop-shadow strength scales with --pulse-glow) */
       filter:
         drop-shadow(0 12px 30px rgba(0,0,0,.35))
-        drop-shadow(0 0 calc(6px + 18px * var(--pulse-glow)) rgba(168,85,247, .55));
+        drop-shadow(0 0 calc(8px + 24px * var(--pulse-glow)) rgba(255,113,206, .65));
       transition: filter .08s linear;
     }
 
@@ -86,6 +83,17 @@
     }
     @keyframes spin{ to{ transform:rotate(360deg);} }
 
+    /* Holographic ring around the vinyl */
+    .vinyl-halo{
+      position:absolute; inset:-18px;
+      border-radius:50%;
+      background: conic-gradient(from 0deg, #ff71ce, #01cdfe, #05ffa1, #fffb96, #b967ff, #ff71ce);
+      filter: blur(10px);
+      opacity: .55;
+      animation: spin 4s linear infinite reverse;
+      z-index: -1;
+    }
+
     /* Orbiting node (continuous) */
     .node-orbit{
       position:absolute; inset:0;
@@ -96,20 +104,20 @@
       position:absolute; left:50%; top:0%;
       transform:translate(-50%,-50%);
       width:16px;height:16px;border-radius:50%;
-      background:var(--accent-cyan);
+      background:var(--holo-cyan);
       /* base glow */
       box-shadow:
-        0 0 8px rgba(34,211,238,.9),
-        0 0 18px rgba(34,211,238,.6),
-        0 0 30px rgba(34,211,238,.35);
+        0 0 8px rgba(1,205,254,.9),
+        0 0 18px rgba(1,205,254,.6),
+        0 0 30px rgba(1,205,254,.35);
       /* add a tiny pulse too */
       animation: nodePulse 1.2s ease-in-out infinite;
     }
     .node::after{
       content:""; position:absolute; inset:-10px; border-radius:50%;
       background:radial-gradient(circle,
-        rgba(34,211,238,.25) 0%,
-        rgba(34,211,238,0) 65%);
+        rgba(1,205,254,.25) 0%,
+        rgba(1,205,254,0) 65%);
       filter:blur(2px);
     }
     @keyframes nodePulse{ 0%{opacity:.35;} 50%{opacity:1;} 100%{opacity:.35;} }
@@ -118,26 +126,41 @@
     .center-btn{ position:absolute; inset:0; display:grid; place-items:center; }
     .pp{
       width:84px;height:84px;border:none;border-radius:50%;cursor:pointer;color:#fff;
-      background: radial-gradient(circle at 35% 35%, rgba(255,255,255,.12), rgba(255,255,255,.02)),
-                  linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
-      box-shadow:0 10px 26px rgba(168,85,247,.35);
+      background: radial-gradient(circle at 35% 35%, rgba(255,255,255,.2), rgba(255,255,255,.02)),
+                  var(--chrome-gradient);
+      background-size: 100% 100%, 300% 300%;
+      animation: holoShift 5s linear infinite;
+      box-shadow:0 10px 30px rgba(168,85,247,.45);
       font-size:2rem; line-height:0;
       transition:transform .15s ease, box-shadow .2s ease;
     }
     .pp:hover{
-      transform:scale(1.05);
-      box-shadow:0 14px 36px rgba(168,85,247,.55);
+      transform:scale(1.08);
+      box-shadow:0 14px 40px rgba(255,113,206,.6);
     }
 
     /* Now Playing Section */
     .now-playing-section {
-      background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(34, 211, 238, 0.1));
-      border: 2px solid rgba(168, 85, 247, 0.3);
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.12), rgba(1, 205, 254, 0.12));
+      border: 2px solid transparent;
       border-radius: 20px;
       padding: 32px 28px;
       min-width: 320px;
       max-width: 380px;
-      box-shadow: 0 10px 40px rgba(168, 85, 247, 0.2);
+      box-shadow: var(--holo-shadow);
+      position: relative;
+    }
+
+    .now-playing-section::before {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: 22px;
+      background: var(--chrome-gradient);
+      background-size: 300% 300%;
+      animation: holoShift 6s linear infinite;
+      z-index: -1;
+      opacity: .6;
     }
 
     .now-playing-header {
@@ -154,14 +177,15 @@
       padding: 20px;
       background: rgba(255, 255, 255, 0.05);
       border-radius: 12px;
-      border-left: 4px solid var(--accent-cyan);
+      border-left: 4px solid var(--holo-cyan);
     }
 
     .current-song-title {
       font-size: 1.5rem;
-      color: aqua;
+      color: var(--holo-cyan);
       font-weight: 700;
       margin-bottom: 8px;
+      text-shadow: 0 0 12px rgba(1, 205, 254, .5);
     }
 
     .current-song-artist {
@@ -227,14 +251,15 @@
     .skip{
       width:56px; height:56px; border:none; border-radius:50%;
       cursor:pointer; color:#fff;
-      background:rgba(255,255,255,.06);
-      box-shadow:0 8px 18px rgba(0,0,0,.25);
+      background:rgba(255,255,255,.08);
+      box-shadow:0 8px 20px rgba(0,0,0,.3);
       font-size:1.25rem;
-      transition:transform .15s ease, background .2s ease;
+      transition:transform .15s ease, background .2s ease, box-shadow .2s ease;
     }
     .skip:hover{
       transform:translateY(-2px);
-      background:rgba(255,255,255,.12);
+      background:rgba(255,255,255,.15);
+      box-shadow: 0 8px 24px rgba(1,205,254,.4);
     }
 
     @media (max-width: 1024px) {
@@ -242,21 +267,16 @@
         flex-direction: column;
         gap: 40px;
       }
-      
+
       .now-playing-section {
         width: 100%;
         max-width: 500px;
       }
     }
   </style>
-</head>
-<body>
-  <div class="header">
-    <div class="home-btn" onclick="window.location.href='/'">
-      <img src="{{ url_for('static', filename='images/Headphone_Home.png') }}" alt="Home">
-    </div>
-  </div>
+{% endblock %}
 
+{% block content %}
   <div class="container screen">
     <div class="title">Party Mix</div>
 
@@ -264,6 +284,7 @@
       <!-- Vinyl Section (Left) -->
       <div class="vinyl-section">
         <div class="vinyl-wrap" id="wrap">
+          <div class="vinyl-halo"></div>
           <!-- wrappers: wobble -> pulse -> spin -->
           <div class="vinyl-outer">
             <div class="vinyl-pulse">
@@ -291,7 +312,7 @@
       <!-- Now Playing Section (Right) -->
       <div class="now-playing-section">
         <div class="now-playing-header">Now Playing</div>
-        
+
         <div class="current-song">
           <div class="current-song-title" id="currentTitle">Dynamite</div>
           <div class="current-song-artist" id="currentArtist">Taio Cruz</div>
@@ -319,7 +340,9 @@
       <source src="{{ url_for('static', filename='mp3s/complete_dj_set.wav') }}" type="audio/wav">
     </audio>
   </div>
+{% endblock %}
 
+{% block scripts %}
   <script>
     const audio = document.getElementById('partyAudio');
     const btn   = document.getElementById('pp');
@@ -353,7 +376,7 @@
             currentSongIndex = i;
             currentTitle.textContent = songs[i].title;
             currentArtist.textContent = songs[i].artist;
-            
+
             // Update queue (show remaining songs)
             updateQueue(i);
           }
@@ -364,12 +387,12 @@
 
     function updateQueue(currentIndex) {
       const upcomingSongs = songs.slice(currentIndex + 1);
-      
+
       if (upcomingSongs.length === 0) {
         queueList.innerHTML = '<li class="queue-item"><div class="queue-item-title" style="color: var(--text-muted);">End of mix</div></li>';
         return;
       }
-      
+
       queueList.innerHTML = upcomingSongs.map(song => `
         <li class="queue-item">
           <div class="queue-item-title">${song.title}</div>
@@ -468,7 +491,7 @@
     });
 
     // Keep spin/node in sync with play state (remove if you want constant spin)
-    const spinners = ()=> wrap.querySelectorAll('.vinyl, .node-orbit');
+    const spinners = ()=> wrap.querySelectorAll('.vinyl, .node-orbit, .vinyl-halo');
     audio.addEventListener('play',  ()=> {
       setupAudioGraph();
       spinners().forEach(el=> el.style.animationPlayState='running');
@@ -487,5 +510,4 @@
       if (e.key.toLowerCase() === 'k') btn.click();
     });
   </script>
-</body>
-</html>
+{% endblock %}

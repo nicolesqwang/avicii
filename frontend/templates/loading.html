@@ -1,15 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI DJ - Processing</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+{% extends "base.html" %}
+
+{% block title %}AI DJ - Processing{% endblock %}
+
+{% block extra_head %}
     <style>
         body {
             overflow: hidden;
         }
-        
+
         .loading-screen {
             position: fixed;
             top: 0;
@@ -20,23 +18,26 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
         }
-        
+
         .loading-title {
             font-size: 3rem;
             font-weight: 700;
-            color: aqua;
-            text-shadow: 0 0 20px rgba(127, 255, 212, 0.6);
+            background: var(--chrome-gradient);
+            background-size: 300% 300%;
+            animation: holoShift 4s linear infinite, pulse 2s ease-in-out infinite;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
             margin-bottom: 20px;
-            animation: pulse 2s ease-in-out infinite;
         }
-        
+
         @keyframes pulse {
             0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.8; transform: scale(1.05); }
+            50% { opacity: 0.85; transform: scale(1.05); }
         }
-        
+
         .vinyl-container {
             position: relative;
             width: 300px;
@@ -46,31 +47,31 @@
             align-items: center;
             justify-content: center;
         }
-        
+
         .vinyl-disc {
             width: 100%;
             height: 100%;
             animation: spin 3s linear infinite;
-            filter: drop-shadow(0 20px 60px rgba(168, 85, 247, 0.4));
+            filter: drop-shadow(0 20px 60px rgba(168, 85, 247, 0.5)) drop-shadow(0 0 40px rgba(1, 205, 254, 0.3));
         }
-        
+
         .vinyl-disc img {
             width: 100%;
             height: 100%;
             object-fit: contain;
         }
-        
+
         @keyframes spin {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
-        
+
         .progress-container {
             width: 500px;
             max-width: 90%;
             margin-top: 40px;
         }
-        
+
         .progress-bar-bg {
             width: 100%;
             height: 8px;
@@ -79,22 +80,24 @@
             overflow: hidden;
             margin-bottom: 30px;
         }
-        
+
         .progress-bar-fill {
             height: 100%;
-            background: linear-gradient(90deg, var(--accent-purple), var(--accent-cyan));
+            background: var(--chrome-gradient);
+            background-size: 300% 300%;
+            animation: holoShift 2s linear infinite;
             border-radius: 10px;
             width: 0%;
             transition: width 0.3s ease;
-            box-shadow: 0 0 10px rgba(168, 85, 247, 0.6);
+            box-shadow: 0 0 16px rgba(168, 85, 247, 0.8);
         }
-        
+
         .processing-steps {
             list-style: none;
             padding: 0;
             margin: 0;
         }
-        
+
         .processing-step {
             display: flex;
             align-items: center;
@@ -106,25 +109,25 @@
             opacity: 0.4;
             transition: all 0.5s ease;
         }
-        
+
         .processing-step.active {
             opacity: 1;
-            border-left-color: var(--accent-cyan);
-            background: rgba(127, 255, 212, 0.1);
+            border-left-color: var(--holo-cyan);
+            background: rgba(1, 205, 254, 0.1);
             animation: stepPulse 1.5s ease-in-out infinite;
         }
-        
+
         .processing-step.complete {
             opacity: 1;
-            border-left-color: #4ade80;
-            background: rgba(74, 222, 128, 0.05);
+            border-left-color: var(--holo-green);
+            background: rgba(5, 255, 161, 0.07);
         }
-        
+
         @keyframes stepPulse {
             0%, 100% { transform: translateX(0); }
             50% { transform: translateX(8px); }
         }
-        
+
         .step-icon {
             width: 32px;
             height: 32px;
@@ -136,76 +139,67 @@
             font-size: 1.2rem;
             background: rgba(255, 255, 255, 0.1);
         }
-        
+
         .processing-step.active .step-icon {
-            background: var(--accent-cyan);
+            background: var(--holo-cyan);
             animation: iconSpin 1s linear infinite;
         }
-        
+
         .processing-step.complete .step-icon {
-            background: #4ade80;
+            background: var(--holo-green);
         }
-        
+
         @keyframes iconSpin {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
-        
+
         .step-text {
             flex: 1;
             color: #fff;
             font-size: 1.1rem;
         }
-        
+
         .processing-step.active .step-text {
             font-weight: 600;
-            color: aqua;
+            color: var(--holo-cyan);
         }
-        
+
         .processing-step.complete .step-text {
-            color: #4ade80;
+            color: var(--holo-green);
         }
-        
+
         .step-status {
             font-size: 1rem;
             color: var(--text-muted);
         }
-        
+
         .processing-step.active .step-status {
-            color: aqua;
+            color: var(--holo-cyan);
         }
-        
+
         .processing-step.complete .step-status {
-            color: #4ade80;
+            color: var(--holo-green);
         }
     </style>
-</head>
-<body>
-    <div class="header">
-        <div class="home-btn" onclick="window.location.href='/'">
-            <img src="{{ url_for('static', filename='images/Headphone_Home.png') }}" 
-                 alt="Home" 
-                 style="width: 60px; height: 60px; cursor: pointer; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); transition: transform 0.3s ease;"
-                 onmouseover="this.style.transform='scale(1.1) rotate(5deg)'"
-                 onmouseout="this.style.transform='scale(1)'">
-        </div>
-    </div>
-    
+{% endblock %}
+
+{% block content %}
     <div class="loading-screen">
         <h1 class="loading-title">🎵 AI DJ Processing</h1>
-        
+
         <div class="vinyl-container">
             <div class="vinyl-disc" id="vinylDisc">
                 <!-- Will be set by JavaScript based on mode -->
                 <img src="{{ url_for('static', filename='images/purple_disc.png') }}" alt="Processing" id="vinylImage">
             </div>
         </div>
-        
+
         <div class="progress-container">
             <div class="progress-bar-bg">
                 <div class="progress-bar-fill" id="progressBar"></div>
             </div>
-            
+
             <ul class="processing-steps" id="processingSteps">
                 <li class="processing-step" data-step="1">
                     <div class="step-icon">🎵</div>
@@ -245,23 +239,25 @@
             </ul>
         </div>
     </div>
-    
+{% endblock %}
+
+{% block scripts %}
     <script>
         const steps = document.querySelectorAll('.processing-step');
         const progressBar = document.getElementById('progressBar');
         const vinylImage = document.getElementById('vinylImage');
         const totalSteps = steps.length;
         let currentStep = 0;
-        
+
         // Get URL parameters
         const urlParams = new URLSearchParams(window.location.search);
         const mode = urlParams.get('mode') || 'remix'; // 'party-mix' or 'remix'
         const playlistName = urlParams.get('playlist') || '';
-        
+
         // Different timing based on mode - more realistic with variation
         let stepDurations;
         let redirectUrl;
-        
+
         if (mode === 'party-mix') {
             // Quick mode for premade mixes (party-mix flow)
             // More varied timing: ~3 seconds total
@@ -276,7 +272,7 @@
             ];
             redirectUrl = '/party-mix';
             console.log('🎉 Party Mix mode - Quick loading');
-            
+
             // Use cyan disc for party mix (library/playback mode)
             vinylImage.src = "{{ url_for('static', filename='images/cyan_disc.png') }}";
         } else {
@@ -293,11 +289,11 @@
             ];
             redirectUrl = '/remix';
             console.log('🎚️  Remix mode - Full processing');
-            
+
             // Use purple disc for remix (creation mode)
             vinylImage.src = "{{ url_for('static', filename='images/purple_disc.png') }}";
         }
-        
+
         function updateStep(stepIndex) {
             if (stepIndex >= totalSteps) {
                 // All steps complete
@@ -312,35 +308,35 @@
                 }
                 return;
             }
-            
+
             const step = steps[stepIndex];
             const statusEl = step.querySelector('.step-status');
-            
+
             // Mark previous steps as complete
             for (let i = 0; i < stepIndex; i++) {
                 steps[i].classList.remove('active');
                 steps[i].classList.add('complete');
                 steps[i].querySelector('.step-status').textContent = '✓ Complete';
             }
-            
+
             // Activate current step
             step.classList.add('active');
             statusEl.textContent = 'Processing...';
-            
+
             // Update progress bar smoothly
             const progress = ((stepIndex + 1) / totalSteps) * 100;
             progressBar.style.width = progress + '%';
-            
+
             // Move to next step after this step's specific duration
             setTimeout(() => {
                 updateStep(stepIndex + 1);
             }, stepDurations[stepIndex]);
         }
-        
+
         function callProcessMixAPI() {
             // This is only called in 'remix' mode
             console.log('📡 Calling /api/process-mix...');
-            
+
             fetch('/api/process-mix', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'}
@@ -348,7 +344,7 @@
             .then(response => response.json())
             .then(data => {
                 console.log('✅ API response:', data);
-                
+
                 if (data.success) {
                     setTimeout(() => {
                         window.location.href = redirectUrl;
@@ -369,16 +365,15 @@
                 }, 1000);
             });
         }
-        
+
         // Start processing after a brief delay
         setTimeout(() => {
             updateStep(0);
         }, 500);
-        
+
         // Update title if playlist name is provided
         if (playlistName && mode === 'party-mix') {
             document.querySelector('.loading-title').textContent = `🎵 Loading ${playlistName}`;
         }
     </script>
-</body>
-</html>
+{% endblock %}

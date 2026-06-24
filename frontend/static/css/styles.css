@@ -1,0 +1,737 @@
+/* AI DJ - Main Stylesheet
+   Holographic Y2K disco theme: chrome gradients, drifting aura light,
+   twinkling sparkle field, and a spinning mirror ball. */
+@import url('https://fonts.googleapis.com/css2?family=Monoton&family=Orbitron:wght@400;700;900&family=Righteous&family=Audiowide&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --bg-dark: #0c0420;
+    --bg-secondary: #211141;
+    --text-light: #f1e9ff;
+    --text-muted: #b3a4d9;
+
+    /* Core accents (kept for existing inline references) */
+    --accent-purple: #b967ff;
+    --accent-cyan: #01cdfe;
+    --accent-red: #ff5277;
+
+    /* Holographic disco palette */
+    --holo-pink: #ff71ce;
+    --holo-cyan: #01cdfe;
+    --holo-green: #05ffa1;
+    --holo-yellow: #fffb96;
+    --holo-purple: #b967ff;
+
+    --chrome-gradient: linear-gradient(115deg,
+        var(--holo-pink) 0%,
+        var(--holo-purple) 20%,
+        var(--holo-cyan) 40%,
+        var(--holo-green) 60%,
+        var(--holo-yellow) 80%,
+        var(--holo-pink) 100%);
+
+    --holo-shadow: 0 20px 60px rgba(185, 103, 255, 0.35), 0 0 80px rgba(1, 205, 254, 0.18);
+
+    --font-main: 'Orbitron', sans-serif;
+    --font-title: 'Audiowide', cursive;
+    --font-accent: 'Righteous', cursive;
+}
+
+@keyframes holoShift {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+body {
+    font-family: var(--font-main);
+    background: linear-gradient(160deg, var(--bg-dark) 0%, #1a0a3a 45%, #0c0420 100%);
+    color: var(--text-light);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* Background photo layer (textural, dimmed under the holo gradient) */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('../images/home_background.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    mix-blend-mode: screen;
+    opacity: 0.5;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Faint scanning shimmer sweeping over everything for a "tech aura" feel */
+body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(100deg,
+        transparent 30%,
+        rgba(255, 255, 255, 0.05) 45%,
+        rgba(255, 113, 206, 0.06) 50%,
+        rgba(255, 255, 255, 0.05) 55%,
+        transparent 70%);
+    background-size: 250% 250%;
+    animation: holoShift 9s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ===================== Aura field (drifting glow blobs) ===================== */
+.aura-field {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.aura-blob {
+    position: absolute;
+    width: 45vmax;
+    height: 45vmax;
+    border-radius: 50%;
+    filter: blur(70px);
+    opacity: 0.45;
+    mix-blend-mode: plus-lighter;
+    animation: auraDrift 22s ease-in-out infinite;
+}
+
+.aura-blob--pink   { background: var(--holo-pink);   top: -10%; left: -10%;  animation-duration: 24s; }
+.aura-blob--cyan   { background: var(--holo-cyan);   top: 10%;  right: -15%; animation-duration: 28s; animation-delay: -6s; }
+.aura-blob--yellow { background: var(--holo-yellow); bottom: -15%; left: 15%; animation-duration: 26s; animation-delay: -12s; opacity: 0.3; }
+.aura-blob--purple { background: var(--holo-purple); bottom: -10%; right: 5%; animation-duration: 30s; animation-delay: -18s; }
+
+@keyframes auraDrift {
+    0%   { transform: translate(0, 0) scale(1); }
+    33%  { transform: translate(6vw, -4vh) scale(1.15); }
+    66%  { transform: translate(-5vw, 5vh) scale(0.9); }
+    100% { transform: translate(0, 0) scale(1); }
+}
+
+/* ===================== Sparkle field (twinkling stars) ===================== */
+.sparkle-field {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image:
+        radial-gradient(2px 2px at 10% 20%, #fff, transparent),
+        radial-gradient(2px 2px at 80% 10%, #fff, transparent),
+        radial-gradient(1.5px 1.5px at 30% 70%, var(--holo-cyan), transparent),
+        radial-gradient(2px 2px at 60% 85%, #fff, transparent),
+        radial-gradient(1.5px 1.5px at 90% 60%, var(--holo-pink), transparent),
+        radial-gradient(2px 2px at 45% 35%, #fff, transparent),
+        radial-gradient(1.5px 1.5px at 15% 90%, var(--holo-yellow), transparent),
+        radial-gradient(2px 2px at 70% 45%, #fff, transparent);
+    background-repeat: repeat;
+    background-size: 100% 100%;
+    animation: twinkle 4s ease-in-out infinite alternate;
+}
+
+@keyframes twinkle {
+    from { opacity: 0.35; }
+    to   { opacity: 0.9; }
+}
+
+/* ===================== Disco ball decoration ===================== */
+.disco-ball {
+    position: fixed;
+    top: 24px;
+    right: 28px;
+    width: 90px;
+    height: 90px;
+    z-index: 5;
+    pointer-events: none;
+}
+
+.disco-ball__glow {
+    position: absolute;
+    inset: -30px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.35) 0%, rgba(185, 103, 255, 0.15) 45%, transparent 70%);
+    animation: pulse 2.4s ease-in-out infinite;
+}
+
+.disco-ball__sphere {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background:
+        repeating-conic-gradient(from 0deg,
+            rgba(255,255,255,0.55) 0deg 6deg,
+            rgba(180,180,220,0.35) 6deg 12deg),
+        radial-gradient(circle at 35% 30%, #fff 0%, #cfd4ff 20%, #8b8fc9 55%, #2c2a52 100%);
+    background-blend-mode: overlay, normal;
+    box-shadow:
+        0 0 20px rgba(255, 255, 255, 0.5),
+        0 0 40px rgba(1, 205, 254, 0.35),
+        0 0 60px rgba(255, 113, 206, 0.25);
+    animation: spin 7s linear infinite;
+}
+
+.disco-ball__shine {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg,
+        transparent 0deg,
+        rgba(255,255,255,0.85) 8deg,
+        transparent 20deg,
+        transparent 180deg,
+        rgba(1,205,254,0.6) 188deg,
+        transparent 200deg);
+    mix-blend-mode: screen;
+    animation: spin 3.5s linear infinite reverse;
+}
+
+@media (max-width: 768px) {
+    .disco-ball { width: 56px; height: 56px; top: 16px; right: 16px; }
+}
+
+/* Header with headphone icon */
+.header {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 100;
+}
+
+.home-btn {
+    width: 60px;
+    height: 60px;
+    cursor: pointer;
+}
+
+.home-btn img {
+    width: 60px;
+    height: 60px;
+    cursor: pointer;
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.4)) drop-shadow(0 0 14px rgba(185, 103, 255, 0.45));
+    transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.home-btn:hover img {
+    transform: scale(1.12) rotate(8deg);
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.4)) drop-shadow(0 0 22px rgba(255, 113, 206, 0.7));
+}
+
+/* Container */
+.container {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* Home Screen */
+.home-screen {
+    text-align: center;
+}
+
+.welcome-title {
+    font-family: var(--font-title);
+    font-size: 6rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    white-space: nowrap;
+    margin-top: -40px;
+    margin-bottom: 60px;
+    position: relative;
+    display: inline-block;
+
+    background: var(--chrome-gradient);
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    animation: holoShift 5s linear infinite, titleFloat 4s ease-in-out infinite;
+    filter: drop-shadow(0 0 18px rgba(255, 113, 206, 0.45)) drop-shadow(0 0 36px rgba(1, 205, 254, 0.3));
+}
+
+/* Chromatic-aberration ghost layers behind the chrome text */
+.welcome-title::before,
+.welcome-title::after {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    -webkit-text-fill-color: initial;
+    background: none;
+}
+
+.welcome-title::before {
+    color: var(--holo-pink);
+    transform: translate(2px, 0);
+    opacity: 0.5;
+    animation: glitchShift 3.2s ease-in-out infinite;
+}
+
+.welcome-title::after {
+    color: var(--holo-cyan);
+    transform: translate(-2px, 0);
+    opacity: 0.5;
+    animation: glitchShift 3.2s ease-in-out infinite reverse;
+}
+
+@keyframes titleFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+@keyframes glitchShift {
+    0%, 90%, 100% { transform: translate(2px, 0); }
+    92% { transform: translate(-3px, 1px); }
+    94% { transform: translate(3px, -1px); }
+}
+
+.disc-options {
+    display: flex;
+    gap: 100px;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Vinyl Disc */
+.vinyl-disc {
+    width: 300px;
+    height: 300px;
+    cursor: pointer;
+    transition: all 0.4s ease;
+    position: relative;
+}
+
+/* Holographic halo ring behind every vinyl disc */
+.vinyl-disc::before {
+    content: '';
+    position: absolute;
+    inset: 6%;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, var(--holo-pink), var(--holo-cyan), var(--holo-green), var(--holo-yellow), var(--holo-purple), var(--holo-pink));
+    filter: blur(18px);
+    opacity: 0.45;
+    z-index: -1;
+    animation: spin 5s linear infinite reverse;
+    transition: opacity 0.4s ease;
+}
+
+.vinyl-disc:hover {
+    transform: scale(1.07);
+    filter: drop-shadow(0 10px 40px rgba(255, 113, 206, 0.55));
+}
+
+.vinyl-disc:hover::before {
+    opacity: 0.75;
+}
+
+.vinyl-disc img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+}
+
+/* Disc rotation animation */
+.rotating {
+    animation: spin 4s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Slow down when hovering */
+.vinyl-disc:hover .rotating {
+    animation: spin 8s linear infinite;
+}
+
+.disc-label {
+    position: absolute;
+    bottom: -50px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-title);
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    white-space: nowrap;
+    animation: labelPulse 2.4s ease-in-out infinite;
+}
+
+.disc-label--purple {
+    color: var(--holo-purple);
+    text-shadow: 0 0 10px var(--holo-purple), 0 0 22px rgba(185, 103, 255, 0.6);
+}
+
+.disc-label--cyan {
+    color: var(--holo-cyan);
+    text-shadow: 0 0 10px var(--holo-cyan), 0 0 22px rgba(1, 205, 254, 0.6);
+}
+
+@keyframes labelPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* Playlist/Library Screens */
+.screen-container {
+    width: 90%;
+    max-width: 900px;
+    margin: 80px auto;
+}
+
+.controls-top {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.play-pause-btn {
+    font-size: 4rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: var(--chrome-gradient);
+    background-size: 300% 300%;
+    animation: holoShift 5s linear infinite;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+}
+
+.play-pause-btn:hover {
+    transform: scale(1.2);
+    filter: drop-shadow(0 0 24px rgba(255, 113, 206, 0.7));
+}
+
+/* Search Bar */
+.search-container {
+    margin-bottom: 30px;
+}
+
+.search-bar {
+    width: 100%;
+    padding: 18px 30px;
+    font-size: 1.2rem;
+    font-family: var(--font-main);
+    background: rgba(33, 17, 65, 0.7);
+    border: 2px solid rgba(255, 255, 255, 0.12);
+    border-radius: 50px;
+    color: var(--text-light);
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.search-bar:focus {
+    border-color: var(--holo-cyan);
+    box-shadow: 0 0 24px rgba(1, 205, 254, 0.4);
+}
+
+.search-bar::placeholder {
+    color: var(--text-muted);
+}
+
+/* Song List */
+.song-list-container {
+    background: rgba(33, 17, 65, 0.65);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 30px;
+    max-height: 500px;
+    overflow-y: auto;
+    box-shadow: var(--holo-shadow);
+}
+
+.playlist-header {
+    font-family: var(--font-title);
+    font-size: 1.8rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 20px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.song-list {
+    list-style: none;
+}
+
+.song-item {
+    padding: 15px 20px;
+    background: rgba(255, 255, 255, 0.05);
+    margin-bottom: 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid transparent;
+}
+
+.song-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(5px);
+    border-color: rgba(255, 113, 206, 0.4);
+    box-shadow: 0 4px 20px rgba(185, 103, 255, 0.25);
+}
+
+.song-item.selected {
+    background: linear-gradient(90deg, rgba(185, 103, 255, 0.3), rgba(1, 205, 254, 0.3));
+    border-left: 4px solid var(--holo-cyan);
+}
+
+.song-title {
+    font-family: var(--font-accent);
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.song-meta {
+    display: flex;
+    gap: 20px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+/* Loading Screen */
+.loading-screen {
+    text-align: center;
+}
+
+.loading-bar-container {
+    width: 60%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px;
+    background: var(--bg-secondary);
+    border-radius: 50px;
+}
+
+.loading-text {
+    font-family: var(--font-title);
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: var(--text-light);
+}
+
+.loading-bar {
+    width: 100%;
+    height: 30px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+}
+
+.loading-progress {
+    height: 100%;
+    background: var(--chrome-gradient);
+    background-size: 300% 300%;
+    animation: load 2s ease-in-out, holoShift 3s linear infinite;
+    border-radius: 20px;
+}
+
+@keyframes load {
+    0% { width: 0%; }
+    100% { width: 100%; }
+}
+
+/* Remix Screen */
+.remix-screen {
+    text-align: center;
+}
+
+.waveform-container {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 40px;
+}
+
+.waveform {
+    width: 45%;
+    height: 60px;
+    background: rgba(255, 82, 119, 0.3);
+    border-radius: 10px;
+}
+
+.turntables {
+    display: flex;
+    gap: 80px;
+    justify-content: center;
+    align-items: center;
+    margin: 40px 0;
+}
+
+.turntable {
+    position: relative;
+}
+
+.turntable-disc {
+    width: 350px;
+    height: 350px;
+    position: relative;
+}
+
+.turntable-disc::before {
+    content: '';
+    position: absolute;
+    inset: 4%;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, var(--holo-pink), var(--holo-cyan), var(--holo-green), var(--holo-yellow), var(--holo-purple), var(--holo-pink));
+    filter: blur(22px);
+    opacity: 0.4;
+    z-index: -1;
+    animation: spin 6s linear infinite reverse;
+}
+
+.turntable-disc img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+}
+
+.track-label {
+    position: absolute;
+    bottom: 30%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-accent);
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+}
+
+.center-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+}
+
+.track-info {
+    background: rgba(33, 17, 65, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 15px 30px;
+    border-radius: 15px;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.info-label {
+    color: var(--text-muted);
+    margin-right: 10px;
+}
+
+/* Up Next */
+.up-next {
+    margin-top: 60px;
+    background: rgba(33, 17, 65, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 20px 40px;
+    border-radius: 20px;
+    font-family: var(--font-title);
+    font-size: 1.5rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.up-next-label {
+    color: var(--text-muted);
+    margin-right: 15px;
+}
+
+/* Scrollbar styling */
+.song-list-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.song-list-container::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+}
+
+.song-list-container::-webkit-scrollbar-thumb {
+    background: var(--holo-purple);
+    border-radius: 10px;
+}
+
+.song-list-container::-webkit-scrollbar-thumb:hover {
+    background: var(--holo-cyan);
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .welcome-title {
+        font-size: 3rem;
+    }
+
+    .disc-options {
+        flex-direction: column;
+        gap: 50px;
+    }
+
+    .vinyl-disc {
+        width: 200px;
+        height: 200px;
+    }
+
+    .turntables {
+        flex-direction: column;
+        gap: 40px;
+    }
+
+    .turntable-disc {
+        width: 250px;
+        height: 250px;
+    }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.7; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.08); }
+}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}AI DJ - Welcome{% endblock %}
+
+{% block content %}
+    <div class="container home-screen">
+        <h1 class="welcome-title" data-text="Welcome DJs">Welcome DJs</h1>
+
+        <div class="disc-options">
+            <!-- New Playlist Disc -->
+            <div class="vinyl-disc" onclick="window.location.href='/new'">
+                <img src="{{ url_for('static', filename='images/purple_disc.png') }}"
+                     alt="New Mix"
+                     class="rotating">
+                <div class="disc-label disc-label--purple">+ NEW MIX</div>
+            </div>
+
+            <!-- Library Disc -->
+            <div class="vinyl-disc" onclick="window.location.href='/library'">
+                <img src="{{ url_for('static', filename='images/cyan_disc.png') }}"
+                     alt="Library"
+                     class="rotating">
+                <div class="disc-label disc-label--cyan">LIBRARY</div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

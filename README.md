@@ -5,7 +5,7 @@ By Emma, Sidh, Aatreyo, and Nicole
 
 run in terminal:
 
-    cd ai-dj-gui
+    cd frontend
 
     # (Optional) Install Flask if you don't have it already
     pip install flask

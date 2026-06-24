@@ -42,7 +42,7 @@ def check_files():
         'static/css/styles.css',
         'static/images/purple_disc.png',
         'static/images/cyan_disc.png',
-        'templates/home.html',
+        'templates/index.html',
         'templates/new_playlist.html',
         'templates/library.html',
         'templates/loading.html',

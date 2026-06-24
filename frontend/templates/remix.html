@@ -1,25 +1,38 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI DJ - Live Mix</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+{% extends "base.html" %}
+
+{% block title %}AI DJ - Live Mix{% endblock %}
+
+{% block extra_head %}
     <style>
         .track-name {
-            color: var(--accent-red);
             font-size: 2.5rem;
             text-align: center;
             margin-bottom: 30px;
-            text-shadow: 0 0 5px #fff, 0 0 10px #ef4444, 0 0 20px #ef4444, 0 0 30px #ef4444;
-            animation: redPulse 2s infinite alternate;
+            background: var(--chrome-gradient);
+            background-size: 300% 300%;
+            animation: holoShift 4s linear infinite;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            filter: drop-shadow(0 0 18px rgba(255, 113, 206, .5));
         }
-        
-        @keyframes redPulse {
-            from { text-shadow: 0 0 5px #fff, 0 0 10px #ef4444, 0 0 20px #ef4444, 0 0 30px #ef4444; }
-            to { text-shadow: 0 0 2px #fff, 0 0 5px #ef4444, 0 0 10px #ef4444; }
+
+        .now-playing-badge {
+            -webkit-text-fill-color: initial;
+            background: none;
+            color: var(--holo-pink);
+            font-size: 1rem;
+            vertical-align: middle;
+            margin-left: 14px;
+            animation: blinkLive 1.4s ease-in-out infinite;
         }
-        
+
+        @keyframes blinkLive {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
         /* DUAL BAR CONTAINER */
         .dual-progress-container {
             width: 80%;
@@ -28,7 +41,7 @@
             position: relative;
             height: 60px;
         }
-        
+
         .progress-track {
             position: relative;
             height: 20px;
@@ -36,11 +49,11 @@
             transition: all 0.3s ease;
             margin: 10px 0;
         }
-        
+
         .progress-track:hover {
             transform: scaleY(1.15);
         }
-        
+
         /* SONG 1 BAR (Purple - Top) */
         .song1-bar {
             position: absolute;
@@ -53,18 +66,18 @@
             border-radius: 12px;
             overflow: hidden;
         }
-        
+
         .song1-progress {
             height: 100%;
-            background: linear-gradient(90deg, 
+            background: linear-gradient(90deg,
                 rgba(168, 85, 247, 1),
-                rgba(168, 85, 247, 0.8)
+                rgba(255, 113, 206, 0.85)
             );
             width: 0%;
             transition: width 0.1s linear, opacity 0.3s ease;
             box-shadow: 0 0 20px rgba(168, 85, 247, 0.8);
         }
-        
+
         /* SONG 2 BAR (Cyan - Bottom) */
         .song2-bar {
             position: absolute;
@@ -72,23 +85,23 @@
             left: 0;
             width: 100%;
             height: 20px;
-            background: rgba(34, 211, 238, 0.15);
-            border: 2px solid rgba(34, 211, 238, 0.5);
+            background: rgba(1, 205, 254, 0.15);
+            border: 2px solid rgba(1, 205, 254, 0.5);
             border-radius: 12px;
             overflow: hidden;
         }
-        
+
         .song2-progress {
             height: 100%;
-            background: linear-gradient(90deg, 
-                rgba(34, 211, 238, 0.8),
-                rgba(34, 211, 238, 1)
+            background: linear-gradient(90deg,
+                rgba(1, 205, 254, 0.85),
+                rgba(5, 255, 161, 1)
             );
             width: 0%;
             transition: width 0.1s linear, opacity 0.3s ease;
-            box-shadow: 0 0 20px rgba(34, 211, 238, 0.8);
+            box-shadow: 0 0 20px rgba(1, 205, 254, 0.8);
         }
-        
+
         /* CROSSFADE ZONE */
         .transition-zone {
             position: absolute;
@@ -97,8 +110,8 @@
             background: linear-gradient(90deg,
                 rgba(255, 255, 255, 0),
                 rgba(168, 85, 247, 0.3) 20%,
-                rgba(200, 130, 240, 0.4) 50%,
-                rgba(34, 211, 238, 0.3) 80%,
+                rgba(255, 113, 206, 0.4) 50%,
+                rgba(1, 205, 254, 0.3) 80%,
                 rgba(255, 255, 255, 0)
             );
             border-left: 2px dashed rgba(255, 255, 255, 0.4);
@@ -106,7 +119,7 @@
             pointer-events: none;
             z-index: 10;
         }
-        
+
         .transition-label {
             position: absolute;
             top: -28px;
@@ -120,7 +133,7 @@
             white-space: nowrap;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
         }
-        
+
         /* PLAYHEAD */
         .playhead {
             position: absolute;
@@ -134,7 +147,7 @@
             transition: left 0.1s linear;
             border-radius: 2px;
         }
-        
+
         /* SEEK OVERLAY */
         .seek-overlay {
             position: absolute;
@@ -145,7 +158,7 @@
             cursor: pointer;
             z-index: 15;
         }
-        
+
         /* TRANSITION OVERLAY */
         .transition-overlay {
             position: fixed;
@@ -153,26 +166,26 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, 
-                transparent 0%, 
-                rgba(168, 85, 247, 0.5) 50%, 
+            background: linear-gradient(90deg,
+                transparent 0%,
+                rgba(255, 113, 206, 0.5) 50%,
                 transparent 100%
             );
             opacity: 0;
             pointer-events: none;
             z-index: 50;
         }
-        
+
         .transition-overlay.active {
             animation: transitionSweep 2s ease-in-out;
         }
-        
+
         @keyframes transitionSweep {
             0% { opacity: 0; transform: translateX(-100%); }
             50% { opacity: 1; transform: translateX(0); }
             100% { opacity: 0; transform: translateX(100%); }
         }
-        
+
         /* LAYOUT */
         .remix-screen {
             display: flex;
@@ -182,7 +195,7 @@
             max-width: 1400px;
             margin: 0 auto;
         }
-        
+
         .turntables {
             display: flex;
             gap: 80px;
@@ -190,7 +203,7 @@
             align-items: center;
             margin: 20px 0 40px 0;
         }
-        
+
         .up-next {
             margin-top: 40px;
             text-align: center;
@@ -199,25 +212,27 @@
             padding: 20px 40px;
             border-radius: 20px;
         }
-        
+
         .up-next-label {
             color: var(--text-muted);
             font-size: 0.9rem;
             margin-right: 10px;
         }
-        
+
         #next-track {
-            color: var(--accent-cyan);
+            color: var(--holo-cyan);
             font-weight: 700;
             font-size: 1.1rem;
         }
-        
+
         /* QUEUE BUTTON */
         .queue-next-btn {
             position: fixed;
             bottom: 30px;
             right: 30px;
-            background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+            background: var(--chrome-gradient);
+            background-size: 300% 300%;
+            animation: holoShift 5s linear infinite;
             color: white;
             border: none;
             padding: 15px 30px;
@@ -226,60 +241,54 @@
             font-size: 1.1rem;
             font-weight: 700;
             cursor: pointer;
-            box-shadow: 0 8px 20px rgba(168, 85, 247, 0.4);
+            box-shadow: 0 8px 24px rgba(168, 85, 247, 0.5);
             transition: all 0.3s ease;
             display: none;
             z-index: 100;
         }
-        
+
         .queue-next-btn.show {
             display: block;
-            animation: slideInBounce 0.6s ease;
+            animation: slideInBounce 0.6s ease, holoShift 5s linear infinite;
         }
-        
+
         .queue-next-btn:hover {
             transform: scale(1.05);
-            box-shadow: 0 12px 30px rgba(168, 85, 247, 0.6);
+            box-shadow: 0 12px 35px rgba(255, 113, 206, 0.6);
         }
-        
+
         @keyframes slideInBounce {
             0% { transform: translateX(300px) scale(0.8); opacity: 0; }
             60% { transform: translateX(-20px) scale(1.05); }
             80% { transform: translateX(10px) scale(0.95); }
             100% { transform: translateX(0) scale(1); opacity: 1; }
         }
-        
+
         /* DISC DIMMING */
         .vinyl-left, .vinyl-right {
             transition: opacity 0.5s ease, filter 0.5s ease;
         }
-        
+
         .vinyl-left.dimmed, .vinyl-right.dimmed {
             opacity: 0.5;
             filter: brightness(0.7);
         }
     </style>
-</head>
-<body>
-    <div class="header">
-        <div class="home-btn" onclick="window.location.href='/'">
-            <img src="{{ url_for('static', filename='images/Headphone_Home.png') }}" 
-                 alt="Home" style="width: 60px; height: 60px; cursor: pointer;">
-        </div>
-    </div>
-    
+{% endblock %}
+
+{% block content %}
     <div class="transition-overlay" id="transitionOverlay"></div>
-    
+
     <div class="container remix-screen">
         <audio id="mixAudio" preload="auto">
             <source src="/api/get-current-mix" type="audio/wav">
         </audio>
-        
+
         <div class="track-name">
             <span id="current-track">{{ current_track_1 if current_track_1 else "NOW MIXING" }}</span>
             <span class="now-playing-badge">● LIVE</span>
         </div>
-        
+
         <!-- DUAL BAR PROGRESS -->
         <div class="dual-progress-container">
             <div class="progress-track">
@@ -287,34 +296,34 @@
                 <div class="song1-bar">
                     <div class="song1-progress" id="song1Progress"></div>
                 </div>
-                
+
                 <!-- Song 2 Bar -->
                 <div class="song2-bar">
                     <div class="song2-progress" id="song2Progress"></div>
                 </div>
-                
+
                 <!-- Crossfade Zone -->
                 <div class="transition-zone" id="transitionZone">
                     <div class="transition-label">CROSSFADE</div>
                 </div>
-                
+
                 <!-- Playhead -->
                 <div class="playhead" id="playhead"></div>
-                
+
                 <!-- Click to Seek -->
                 <div class="seek-overlay" onclick="seekAudio(event)"></div>
             </div>
         </div>
-        
+
         <div class="turntables">
             <div class="turntable">
                 <div class="turntable-disc vinyl-left">
-                    <img src="{{ url_for('static', filename='images/purple_disc.png') }}" 
+                    <img src="{{ url_for('static', filename='images/purple_disc.png') }}"
                          class="rotating" alt="Left Deck">
                     <div class="track-label">{{ current_track_1 if current_track_1 else "TRACK 1" }}</div>
                 </div>
             </div>
-            
+
             <div class="center-controls">
                 <div class="play-pause-btn" onclick="togglePlay()">||</div>
                 <div class="track-info">
@@ -326,26 +335,28 @@
                     <span id="key">{{ current_key if current_key else "G major" }}</span>
                 </div>
             </div>
-            
+
             <div class="turntable">
                 <div class="turntable-disc vinyl-right">
-                    <img src="{{ url_for('static', filename='images/cyan_disc.png') }}" 
+                    <img src="{{ url_for('static', filename='images/cyan_disc.png') }}"
                          class="rotating" alt="Right Deck">
                     <div class="track-label">{{ current_track_2 if current_track_2 else "TRACK 2" }}</div>
                 </div>
             </div>
         </div>
-        
+
         <div class="up-next">
             <span class="up-next-label">UP NEXT:</span>
             <span id="next-track">{{ current_track_2 if current_track_2 else "Next track..." }}</span>
         </div>
-        
+
         <button class="queue-next-btn" id="queueBtn" onclick="queueNextSong()">
             ➕ Queue Next Song
         </button>
     </div>
-    
+{% endblock %}
+
+{% block scripts %}
     <script>
         let isPlaying = false;
         const audioElement = document.getElementById('mixAudio');
@@ -359,11 +370,11 @@
         const trackNameDisplay = document.getElementById('current-track');
         const queueBtn = document.getElementById('queueBtn');
         let hasTransitioned = false;
-        
+
         let FADE_START_TIME = 0;
         let FADE_END_TIME = 0;
         let TOTAL_DURATION = 0;
-        
+
         // Load crossfade timing from JSON
         fetch('{{ url_for("static", filename="crossfade_timing.json") }}')
             .then(response => response.json())
@@ -371,16 +382,16 @@
                 // Get mix filename from audio source
                 const audioSrc = audioElement.querySelector('source').src;
                 const mixName = audioSrc.split('/').pop();
-                
+
                 console.log(`🎵 Looking for timing: ${mixName}`);
-                
+
                 // Check all possible mix names
                 const possibleNames = [
                     mixName,
                     mixName.replace('.wav', ''),
                     decodeURIComponent(mixName)
                 ];
-                
+
                 for (const name of possibleNames) {
                     if (config.mixes[name]) {
                         const timing = config.mixes[name];
@@ -391,16 +402,16 @@
                         return;
                     }
                 }
-                
+
                 console.log(`⚠️  Mix "${mixName}" not found in config`);
             })
             .catch(err => {
                 console.error('Failed to load timing config:', err);
             });
-        
+
         audioElement.addEventListener('loadedmetadata', () => {
             TOTAL_DURATION = audioElement.duration;
-            
+
             // If no timing loaded, use default
             if (FADE_START_TIME === 0 && FADE_END_TIME === 0) {
                 const halfPoint = TOTAL_DURATION / 2;
@@ -409,34 +420,34 @@
                 FADE_END_TIME = halfPoint + (fadeDuration / 2);
                 console.log('⚠️  Using default 15% crossfade');
             }
-            
+
             // Position crossfade zone
             const fadeStartRatio = FADE_START_TIME / TOTAL_DURATION;
             const fadeEndRatio = FADE_END_TIME / TOTAL_DURATION;
             const fadeWidth = fadeEndRatio - fadeStartRatio;
-            
+
             transitionZone.style.left = (fadeStartRatio * 100) + '%';
             transitionZone.style.width = (fadeWidth * 100) + '%';
-            
+
             console.log(`📊 Crossfade zone: ${(fadeStartRatio * 100).toFixed(1)}% - ${(fadeEndRatio * 100).toFixed(1)}%`);
             console.log(`   Start: ${FADE_START_TIME.toFixed(1)}s, End: ${FADE_END_TIME.toFixed(1)}s, Total: ${TOTAL_DURATION.toFixed(1)}s`);
-            
+
             // Auto-play
             audioElement.play().then(() => {
                 isPlaying = true;
                 document.querySelector('.play-pause-btn').textContent = '||';
             }).catch(err => console.log('Autoplay prevented:', err));
         });
-        
+
         function updateProgress() {
             if (!TOTAL_DURATION) return;
-            
+
             const currentTime = audioElement.currentTime;
-            
+
             // Update playhead position
             const progress = currentTime / TOTAL_DURATION;
             playhead.style.left = (progress * 100) + '%';
-            
+
             // Song 1 Progress Logic
             if (currentTime < FADE_START_TIME) {
                 // Before crossfade: fill normally
@@ -453,7 +464,7 @@
                 song1Progress.style.width = '100%';
                 song1Progress.style.opacity = '0';
             }
-            
+
             // Song 2 Progress Logic
             if (currentTime < FADE_START_TIME) {
                 // Before crossfade: empty
@@ -470,7 +481,7 @@
                 song2Progress.style.width = (prog * 100) + '%';
                 song2Progress.style.opacity = '1';
             }
-            
+
             // Highlight active disc
             const midPoint = (FADE_START_TIME + FADE_END_TIME) / 2;
             if (currentTime < midPoint) {
@@ -483,7 +494,7 @@
                 }
             }
         }
-        
+
         function highlightActiveDisc(discNumber) {
             if (!vinylLeft || !vinylRight) return;
             if (discNumber === 1) {
@@ -494,7 +505,7 @@
                 vinylRight.classList.remove('dimmed');
             }
         }
-        
+
         function triggerSongTransition() {
             console.log('🎵 Transitioning to next song...');
             transitionOverlay.classList.add('active');
@@ -502,29 +513,29 @@
             const nextTrackName = document.getElementById('next-track').textContent;
             trackNameDisplay.textContent = nextTrackName;
         }
-        
+
         function seekAudio(event) {
             const rect = event.currentTarget.getBoundingClientRect();
             const clickX = event.clientX - rect.left;
             const percentage = clickX / rect.width;
             audioElement.currentTime = percentage * audioElement.duration;
-            
+
             // Reset transition if seeking backwards
             const midPoint = (FADE_START_TIME + FADE_END_TIME) / 2;
             if (audioElement.currentTime < midPoint) {
                 hasTransitioned = false;
             }
         }
-        
+
         audioElement.addEventListener('timeupdate', updateProgress);
-        
+
         audioElement.addEventListener('ended', () => {
             console.log('🎉 Mix finished!');
             isPlaying = false;
             document.querySelector('.play-pause-btn').textContent = '▶';
             queueBtn.classList.add('show');
         });
-        
+
         function togglePlay() {
             const btn = event.target;
             if (isPlaying) {
@@ -537,15 +548,14 @@
                 isPlaying = true;
             }
         }
-        
+
         function queueNextSong() {
             console.log('🎵 Queueing next song...');
             queueBtn.textContent = '✓ Added to Queue';
-            queueBtn.style.background = 'linear-gradient(135deg, #10b981, #06b6d4)';
+            queueBtn.style.background = 'linear-gradient(135deg, var(--holo-green), var(--holo-cyan))';
             setTimeout(() => {
                 window.location.href = '/new';
             }, 1000);
         }
     </script>
-</body>
-</html>
+{% endblock %}
