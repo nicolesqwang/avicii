@@ -20,7 +20,11 @@ if REPO_ROOT not in sys.path:
     sys.path.insert(0, REPO_ROOT)
     print(f"✅ Added to Python path: {REPO_ROOT}")
 
-app = Flask(__name__)
+import os
+app = Flask(__name__, 
+            template_folder=os.path.join(os.path.dirname(__file__), 'templates'),
+            static_folder=os.path.join(os.path.dirname(__file__), 'static'))
+
 app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-here')  # Change this in production!
 
 # Configuration - Point to data directory (sibling to frontend)
